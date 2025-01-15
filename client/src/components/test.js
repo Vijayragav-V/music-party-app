@@ -2,46 +2,43 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import YoutubePlayer from "youtube-player";
 
-const nginig = ({ videoId, src, title, author }) => {
+const YouTubeEmbed = ({ videoId, src, title, author }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(videoId);
-  const [player, setPlayer] = useState(null);
   const playerRef = useRef(null);
 
   useEffect(() => {
     const ytPlayer = YoutubePlayer(playerRef.current, {
-      videoId,
-      width: '1',
-      height: '1',
+      videoId: currentVideoId,
+      width: "1",
+      height: "1",
+      playerVars: {
+        autoplay: 1,
+        controls: 1,
+        modestbranding: 1,
+      },
     });
-    setPlayer(ytPlayer);
 
-    return () => {
-      ytPlayer.destroy();
-    };
-  }, [videoId]);
+    playerRef.current = ytPlayer;
+
+    // Add event listeners
+    ytPlayer.on("stateChange", (event) => {
+      if (event.data === 0) {
+        // Video ended, play next video
+        playNextVideoInQueue();
+      }
+    });
+
+  }, [currentVideoId]);
 
   const handlePlayPause = () => {
-    if (player) {
+    if (playerRef.current) {
       if (isPlaying) {
-        player.pauseVideo();
+        playerRef.current.pauseVideo();
       } else {
-        player.playVideo();
+        playerRef.current.playVideo();
       }
       setIsPlaying(!isPlaying);
-    }
-  };
-
-  const onReady = (event) => {
-    // Store the player instance in the ref
-    playerRef.current = event.target;
-    event.target.playVideo(); // Autoplay the video
-    setIsPlaying(true);
-  };
-
-  const onStateChange = (event) => {
-    if (event.data === 0) {
-      playNextVideoInQueue();
     }
   };
 
@@ -53,6 +50,7 @@ const nginig = ({ videoId, src, title, author }) => {
 
       localStorage.setItem("queue", JSON.stringify(queue));
       setCurrentVideoId(nextVideoId);
+      setIsPlaying(true); // Auto-play the next video
     } else {
       setIsPlaying(false);
       setCurrentVideoId(null);
@@ -70,18 +68,11 @@ const nginig = ({ videoId, src, title, author }) => {
         <p className="font-semibold text-xl">{title}</p>
         <p className="font-light text-sm italic">{author}</p>
       </div>
-      <Youtube
-        videoId={currentVideoId}
-        className="z-50"
-        opts={{
-          playerVars: {
-            autoplay: 1,
-            controls: 1,
-            modestbranding: 1,
-          },
-        }}
-        onStateChange={onStateChange}
-      />
+      {/* Hidden YouTube Player */}
+      <div
+        ref={playerRef}
+        style={{ width: "1px", height: "1px", overflow: "hidden" }}
+      ></div>
       <div className="absolute bottom-4 flex space-x-4 z-50">
         <button
           onClick={handlePlayPause}
@@ -100,4 +91,4 @@ const nginig = ({ videoId, src, title, author }) => {
   );
 };
 
-export default nginig;
+export default YouTubeEmbed;
