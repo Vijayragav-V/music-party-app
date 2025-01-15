@@ -1,15 +1,18 @@
 const axios = require('axios');
+require('dotenv').config();
 
-const API_KEY = 'AIzaSyAK_951jvzVvHlDPhP-xTdlhg1z1VGUlNQ';
+const API_KEY = process.env.API_KEY;
 
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3/search';
 
-const searchVideos = async (query) => {
-  if (!query) {
-    throw new Error('Search query is required');
-  }
-
+const searchVideos = async (req, res) => {
   try {
+    const query = req.query.q;
+
+    if (!query) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
     const response = await axios.get(YOUTUBE_BASE_URL, {
       params: {
         part: 'snippet',
@@ -20,15 +23,17 @@ const searchVideos = async (query) => {
       },
     });
 
-    return response.data.items.map((item) => ({
+    const videos = response.data.items.map((item) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
-      description: item.snippet.description,
+      author: item.snippet.channelTitle,
       thumbnail: item.snippet.thumbnails.default.url,
     }));
+
+    res.status(200).json(videos);
   } catch (error) {
     console.error('Error fetching video search results:', error.message);
-    throw new Error('Failed to fetch video search results');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 

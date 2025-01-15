@@ -3,7 +3,7 @@ const videoController = require('../controllers/videoController');
 
 const router = express.Router();
 
-router.post('/search-videos', videoController.searchVideos);
-router.post('/play-video', videoController.playVideo);
+router.get('/search-videos', videoController.searchVideos);
+router.get('/play-video', videoController.playVideo);
 
 module.exports = router;

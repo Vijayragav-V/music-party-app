@@ -1,47 +1,46 @@
 import React, { useState } from 'react';
 import { searchVideos } from '../services/api';
 
-const VideoSearch = () => {
-  const [query, setQuery] = useState(''); // State to store the search query
-  const [videos, setVideos] = useState([]); // State to store the search results
+const Home = () => {
+  const [query, setQuery] = useState('');
+  const [videos, setVideos] = useState([]);
 
   const handleSearch = async () => {
     try {
-      const results = await searchVideos(query); // Fetch search results from the server
-      console.log('Search results:', results); // Print results to the console
-      setVideos(results); // Update the state with the search results
+      const results = await searchVideos(query);
+      setVideos(results);
     } catch (error) {
-      console.error('Error fetching search results:', error);
+      console.error('Error fetching videos:', error);
     }
   };
 
+  /*const addToQueue = (videoId) => {
+    const storedQueue = JSON.parse(localStorage.getItem('videoQueue')) || [];
+    storedQueue.push(videoId);
+    localStorage.setItem('videoQueue', JSON.stringify(storedQueue));
+    alert('Video added to queue!');
+  };*/
+
   return (
     <div>
-      <h1>Video Search</h1>
+      <h1>Search Videos</h1>
       <input
         type="text"
         value={query}
-        onChange={(e) => setQuery(e.target.value)} // Update query state on input change
+        onChange={(e) => setQuery(e.target.value)}
         placeholder="Search for videos"
       />
       <button onClick={handleSearch}>Search</button>
-
-      <div>
-        <h2>Search Results</h2>
-        <ul>
-          {videos.map((video) => (
-            <li key={video.videoId}>
-              <img src={video.thumbnail} alt={video.title} />
-              <div>
-                <h3>{video.title}</h3>
-                <p>{video.description}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul>
+        {videos.map((video) => (
+          <li key={video.videoId}>
+            <img src={video.thumbnail} alt={video.title} />
+            <h3>{video.title}</h3>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default VideoSearch;
+export default Home;
